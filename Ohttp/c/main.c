@@ -13,6 +13,17 @@ void response(int client)
 
     ++g_idx;
     printf("response %d \n", g_idx);
+
+
+    strcpy(buf, "HTTP/1.0 200 OK\r\n");
+    send(client, buf, strlen(buf), 0);
+    strcpy(buf, "Server: OServer 0.1\r\n");
+    send(client, buf, strlen(buf), 0);
+    sprintf(buf, "Content-Type: text/html\r\n");
+    send(client, buf, strlen(buf), 0);
+    strcpy(buf, "\r\n");
+    send(client, buf, strlen(buf), 0);
+
     sprintf(buf, "<html>Welcome to Ohttp! %d<html>", g_idx);
     send(client, buf, strlen(buf), 0);
 }
