@@ -7,13 +7,12 @@
 
 int g_idx = 0;
 
-void response(int client)
+void response(int client, char* request)
 {
     char buf[BUF_SIZE];
 
     ++g_idx;
-    printf("response %d \n", g_idx);
-
+    printf("response %d %s\n", g_idx, request);
 
     strcpy(buf, "HTTP/1.0 200 OK\r\n");
     send(client, buf, strlen(buf), 0);
@@ -24,8 +23,37 @@ void response(int client)
     strcpy(buf, "\r\n");
     send(client, buf, strlen(buf), 0);
 
-    sprintf(buf, "<html>Welcome to Ohttp! %d<html>", g_idx);
+    sprintf(buf, "<html>Welcome to Ohttp! %d %s<html>", g_idx, request);
     send(client, buf, strlen(buf), 0);
+}
+
+int get_request(const char* header, char* get)
+{
+    const char* p = header;
+    int space_idx = 0;
+    int get_idx = 0;
+    while(p != 0)
+    {
+        //printf("%d\n", *p);
+        if(*p == ' ')
+        {
+            space_idx++;
+            if(space_idx == 2)
+            {
+                get[get_idx] = 0;
+                return get_idx;
+            }
+        }
+        else
+        {
+            if(space_idx == 1)
+            {
+                get[get_idx++] = *p;
+            }
+        }
+        p++;
+    }
+    return get_idx;
 }
 
 int create_tcp_socket()
@@ -111,8 +139,9 @@ int main()
             continue;
         }
 
-        response(client_sock);
-        
+        char tmp_str[1024];
+        get_request(recv_buffer, tmp_str);
+        response(client_sock, tmp_str);
         /*
         printf("+++++++++++++++++++++++++++++++++++++++\n");
         printf("%s\n", recv_buffer);
